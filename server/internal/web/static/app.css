@@ -34,7 +34,8 @@ select {
   font: inherit;
 }
 
-button {
+button,
+.buttonLink {
   min-height: 38px;
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -44,7 +45,8 @@ button {
   cursor: pointer;
 }
 
-button:hover:not(:disabled) {
+button:hover:not(:disabled),
+.buttonLink:hover {
   border-color: var(--accent);
 }
 
@@ -132,6 +134,12 @@ h2 {
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
+}
+
+.buttonLink {
+  display: inline-grid;
+  place-items: center;
+  text-decoration: none;
 }
 
 .videoGrid {
@@ -486,8 +494,51 @@ h2 {
   font-size: 12px;
 }
 
+.adminBody {
+  background: #eef3f1;
+}
+
+.adminShell {
+  display: grid;
+  gap: 12px;
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  padding: 14px;
+}
+
+.adminTopbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 14px;
+}
+
+#adminStatusLine {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.adminDashboard {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.adminWide {
+  grid-column: 1 / -1;
+}
+
 @media (max-width: 920px) {
   .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .adminDashboard {
     grid-template-columns: 1fr;
   }
 
@@ -503,6 +554,7 @@ h2 {
 
 @media (max-width: 560px) {
   .topbar,
+  .adminTopbar,
   .panelHeader,
   .chatForm,
   .form.compact {
@@ -511,6 +563,7 @@ h2 {
   }
 
   .topbar,
+  .adminTopbar,
   .panelHeader {
     display: grid;
   }

@@ -14,5 +14,12 @@ func Handler() http.Handler {
 	if err != nil {
 		panic(err)
 	}
-	return http.FileServer(http.FS(static))
+	fileserver := http.FileServer(http.FS(static))
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/admin" {
+			http.Redirect(w, r, "/admin.html", http.StatusTemporaryRedirect)
+			return
+		}
+		fileserver.ServeHTTP(w, r)
+	})
 }

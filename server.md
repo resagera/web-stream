@@ -62,8 +62,10 @@ server/
   internal/profile/store.go       # JSON-хранилище гостей
   internal/web/web.go             # embed frontend static files
   internal/web/static/index.html  # основной экран приложения
+  internal/web/static/admin.html  # отдельная страница админки
   internal/web/static/app.css     # стили frontend
   internal/web/static/app.js      # frontend логика: auth, LiveKit, chat, admin invites
+  internal/web/static/admin.js    # standalone admin UI: login, event, passwords, invites, status, journal
 
   data/.gitkeep                   # каталог runtime-данных
   .dockerignore                   # исключает runtime/build artifacts из Docker context
@@ -252,6 +254,9 @@ Frontend встроен в backend и доступен по корневому U
 GET /
 GET /app.css
 GET /app.js
+GET /admin.html
+GET /admin.js
+GET /admin -> 307 /admin.html
 ```
 
 Отдельная npm-сборка сейчас не нужна. В браузере `app.js` импортирует LiveKit client SDK через CDN:
@@ -282,6 +287,7 @@ https://cdn.jsdelivr.net/npm/livekit-client/+esm
 18. сохранять выбранные устройства ввода в `localStorage`.
 19. в admin status UI отдельно показывать камеры в эфире, устройства-трансляторы онлайн и зрителей;
 20. менять пароли ролей `guest`, `broadcaster`, `admin` в админ-панели.
+21. открывать отдельную админку на `/admin.html`.
 
 ## API
 

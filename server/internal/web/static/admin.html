@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Family Stream Admin</title>
+    <link rel="stylesheet" href="/app.css">
+    <script type="module" src="/admin.js"></script>
+  </head>
+  <body class="adminBody">
+    <main class="adminShell">
+      <header class="adminTopbar">
+        <div>
+          <h1>Админка</h1>
+          <p id="adminStatusLine">Не авторизован</p>
+        </div>
+        <div class="topActions">
+          <a class="buttonLink" href="/">Эфир</a>
+          <button id="adminLogoutButton" type="button" hidden>Выйти</button>
+        </div>
+      </header>
+
+      <section id="adminLoginPanel" class="panel">
+        <div class="panelHeader">
+          <h2>Вход администратора</h2>
+        </div>
+        <form id="adminLoginForm" class="form">
+          <label>
+            Имя
+            <input id="adminNameInput" name="adminName" autocomplete="name" required>
+          </label>
+          <label>
+            Пароль
+            <input id="adminLoginPasswordInput" name="adminPassword" type="password" autocomplete="current-password" required>
+          </label>
+          <button type="submit">Войти</button>
+          <p id="adminLoginError" class="error" role="alert"></p>
+        </form>
+      </section>
+
+      <section id="adminDashboard" class="adminDashboard" hidden>
+        <section class="panel">
+          <div class="panelHeader">
+            <h2>Событие</h2>
+            <button id="adminRefreshButton" type="button">Обновить</button>
+          </div>
+          <form id="adminEventForm" class="form">
+            <label>
+              Название
+              <input id="adminEventTitleInput" name="eventTitle">
+            </label>
+            <label>
+              Описание
+              <input id="adminEventDescriptionInput" name="eventDescription">
+            </label>
+            <button type="submit">Сохранить</button>
+          </form>
+        </section>
+
+        <section class="panel">
+          <div class="panelHeader">
+            <h2>Пароли</h2>
+            <span id="adminPasswordStatus" class="muted">не загружено</span>
+          </div>
+          <form id="adminPasswordsForm" class="form">
+            <label>
+              Гости
+              <input id="adminGuestPasswordInput" name="guestPassword" type="password" autocomplete="new-password" placeholder="Новый пароль">
+            </label>
+            <label>
+              Камеры
+              <input id="adminBroadcasterPasswordInput" name="broadcasterPassword" type="password" autocomplete="new-password" placeholder="Новый пароль">
+            </label>
+            <label>
+              Админ
+              <input id="adminNewPasswordInput" name="adminPassword" type="password" autocomplete="new-password" placeholder="Новый пароль">
+            </label>
+            <button type="submit">Сохранить пароли</button>
+          </form>
+        </section>
+
+        <section class="panel">
+          <div class="panelHeader">
+            <h2>Статус</h2>
+            <span id="adminLiveCameraCount" class="muted">0 live</span>
+          </div>
+          <div class="stats">
+            <div><strong id="adminOnlineCount">0</strong><span>online</span></div>
+            <div><strong id="adminViewerCount">0</strong><span>гости</span></div>
+            <div><strong id="adminCameraCount">0</strong><span>камеры</span></div>
+          </div>
+          <div class="subsectionHeader">
+            <h3>Камеры в эфире</h3>
+          </div>
+          <div id="adminLiveCameraList" class="statusList"></div>
+          <div class="subsectionHeader">
+            <h3>Устройства онлайн</h3>
+            <span id="adminChatCameraCount" class="muted">0 online</span>
+          </div>
+          <div id="adminCameraPresenceList" class="statusList"></div>
+          <div class="subsectionHeader">
+            <h3>Зрители</h3>
+            <span id="adminViewerPresenceCount" class="muted">0 online</span>
+          </div>
+          <div id="adminViewerPresenceList" class="statusList"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panelHeader">
+            <h2>Invite</h2>
+          </div>
+          <form id="adminInviteForm" class="form compact">
+            <label>
+              Метка
+              <input id="adminInviteLabelInput" name="inviteLabel">
+            </label>
+            <label>
+              Роль
+              <select id="adminInviteRoleInput" name="inviteRole">
+                <option value="guest">Гость</option>
+                <option value="broadcaster">Камера</option>
+                <option value="admin">Админ</option>
+              </select>
+            </label>
+            <label>
+              Лимит
+              <input id="adminInviteUsesInput" name="inviteUses" type="number" min="0" value="1">
+            </label>
+            <button type="submit">Создать</button>
+          </form>
+          <div id="adminInviteList" class="inviteList"></div>
+        </section>
+
+        <section class="panel adminWide">
+          <div class="panelHeader">
+            <h2>Журнал</h2>
+            <span class="muted">последние события</span>
+          </div>
+          <div id="adminJournalList" class="journalList"></div>
+        </section>
+      </section>
+    </main>
+  </body>
+</html>

@@ -61,7 +61,7 @@ func TestStaticFrontendServed(t *testing.T) {
 	t.Parallel()
 
 	server := newTestServer(t)
-	for _, path := range []string{"/", "/app.css", "/app.js"} {
+	for _, path := range []string{"/", "/app.css", "/app.js", "/admin.html", "/admin.js"} {
 		req := httptest.NewRequest(http.MethodGet, path, nil)
 		rec := httptest.NewRecorder()
 
@@ -72,6 +72,16 @@ func TestStaticFrontendServed(t *testing.T) {
 		if rec.Body.Len() == 0 {
 			t.Fatalf("GET %s returned empty body", path)
 		}
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/admin", nil)
+	rec := httptest.NewRecorder()
+	server.Handler().ServeHTTP(rec, req)
+	if rec.Code != http.StatusTemporaryRedirect {
+		t.Fatalf("GET /admin status = %d, want 307", rec.Code)
+	}
+	if location := rec.Header().Get("Location"); location != "/admin.html" {
+		t.Fatalf("GET /admin Location = %q, want /admin.html", location)
 	}
 }
 
