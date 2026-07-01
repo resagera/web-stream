@@ -1,0 +1,13 @@
+{
+	email {$ACME_EMAIL:admin@example.com}
+}
+
+{$APP_DOMAIN:stream.localhost} {
+	encode zstd gzip
+	reverse_proxy backend:8080
+}
+
+{$LIVEKIT_DOMAIN:livekit.localhost} {
+	encode zstd gzip
+	reverse_proxy livekit:7880
+}

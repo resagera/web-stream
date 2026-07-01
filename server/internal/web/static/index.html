@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Family Stream</title>
+    <link rel="stylesheet" href="/app.css">
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="videoPane" aria-label="Видео">
+        <header class="topbar">
+          <div>
+            <h1>Family Stream</h1>
+            <p id="statusLine">Не подключено</p>
+          </div>
+          <div class="topActions">
+            <button id="connectButton" type="button" disabled>Подключиться</button>
+            <button id="publishButton" type="button" hidden>Камера</button>
+            <button id="logoutButton" type="button" hidden>Выйти</button>
+          </div>
+        </header>
+
+        <div id="videoGrid" class="videoGrid">
+          <div class="emptyState">Ожидание камер</div>
+        </div>
+      </section>
+
+      <aside class="sidePane">
+        <section id="loginPanel" class="panel">
+          <div class="panelHeader">
+            <h2>Вход</h2>
+          </div>
+
+          <div class="tabs" role="tablist" aria-label="Вариант входа">
+            <button id="passwordTab" class="tab active" type="button">Пароль</button>
+            <button id="inviteTab" class="tab" type="button">Invite</button>
+          </div>
+
+          <form id="loginForm" class="form">
+            <label>
+              Имя
+              <input id="nameInput" name="name" autocomplete="name" required>
+            </label>
+
+            <label id="passwordField">
+              Пароль
+              <input id="passwordInput" name="password" type="password" autocomplete="current-password">
+            </label>
+
+            <label id="inviteField" hidden>
+              Invite token
+              <input id="inviteInput" name="invite" autocomplete="off">
+            </label>
+
+            <label id="roleField">
+              Роль
+              <select id="roleInput" name="role">
+                <option value="guest">Гость</option>
+                <option value="broadcaster">Камера</option>
+                <option value="admin">Админ</option>
+              </select>
+            </label>
+
+            <button type="submit">Войти</button>
+            <p id="loginError" class="error" role="alert"></p>
+          </form>
+        </section>
+
+        <section id="profilePanel" class="panel" hidden>
+          <div class="panelHeader">
+            <div class="identity">
+              <img id="avatarPreview" class="avatar" alt="">
+              <div>
+                <h2 id="guestName">Гость</h2>
+                <span id="guestRole" class="pill">guest</span>
+              </div>
+            </div>
+          </div>
+          <form id="profileForm" class="form">
+            <label>
+              Имя
+              <input id="profileNameInput" name="profileName">
+            </label>
+            <label>
+              Фото
+              <input id="photoFileInput" name="photoFile" type="file" accept="image/*">
+            </label>
+            <div class="photoActions">
+              <button id="webcamPhotoButton" type="button">С вебки</button>
+              <button id="clearPhotoButton" type="button">Убрать</button>
+            </div>
+            <div id="webcamBox" class="webcamBox" hidden>
+              <video id="webcamPreview" playsinline muted></video>
+              <div class="photoActions">
+                <button id="capturePhotoButton" type="button">Снимок</button>
+                <button id="cancelWebcamButton" type="button">Закрыть</button>
+              </div>
+            </div>
+            <button type="submit">Сохранить</button>
+          </form>
+        </section>
+
+        <section id="broadcasterPanel" class="panel" hidden>
+          <div class="panelHeader">
+            <h2>Устройство</h2>
+            <span id="publishState" class="muted">offline</span>
+          </div>
+          <form id="broadcasterForm" class="form">
+            <label>
+              Имя камеры
+              <input id="cameraNameInput" name="cameraName" placeholder="Кухня">
+            </label>
+            <label>
+              Камера
+              <select id="videoDeviceInput" name="videoDevice">
+                <option value="">Авто</option>
+              </select>
+            </label>
+            <label>
+              Микрофон
+              <select id="audioDeviceInput" name="audioDevice">
+                <option value="">Авто</option>
+              </select>
+            </label>
+            <div id="broadcasterPreviewBox" class="broadcasterPreviewBox">
+              <video id="broadcasterPreview" playsinline muted></video>
+            </div>
+            <div class="broadcastActions">
+              <button id="previewButton" type="button">Проверить</button>
+              <button id="panelPublishButton" type="button">В эфир</button>
+              <button type="submit">Сохранить имя</button>
+            </div>
+            <p id="deviceStatus" class="muted">Устройства не проверены</p>
+          </form>
+        </section>
+
+        <section id="adminPanel" class="panel" hidden>
+          <div class="panelHeader">
+            <h2>Админ</h2>
+            <button id="refreshAdminButton" type="button">Обновить</button>
+          </div>
+          <form id="eventForm" class="form">
+            <label>
+              Название
+              <input id="eventTitleInput" name="eventTitle">
+            </label>
+            <label>
+              Описание
+              <input id="eventDescriptionInput" name="eventDescription">
+            </label>
+            <button type="submit">Сохранить событие</button>
+          </form>
+          <div class="stats">
+            <div><strong id="onlineCount">0</strong><span>online</span></div>
+            <div><strong id="viewerCount">0</strong><span>гости</span></div>
+            <div><strong id="cameraCount">0</strong><span>камеры</span></div>
+          </div>
+          <div class="subsectionHeader">
+            <h3>Камеры в эфире</h3>
+            <span id="liveCameraCount" class="muted">0 live</span>
+          </div>
+          <div id="liveCameraList" class="statusList"></div>
+          <div class="subsectionHeader">
+            <h3>Устройства онлайн</h3>
+            <span id="chatCameraCount" class="muted">0 online</span>
+          </div>
+          <div id="cameraPresenceList" class="statusList"></div>
+          <div class="subsectionHeader">
+            <h3>Зрители</h3>
+            <span id="viewerPresenceCount" class="muted">0 online</span>
+          </div>
+          <div id="viewerPresenceList" class="statusList"></div>
+          <div class="subsectionHeader">
+            <h3>Журнал</h3>
+            <span class="muted">последние события</span>
+          </div>
+          <div id="journalList" class="journalList"></div>
+        </section>
+
+        <section id="invitePanel" class="panel" hidden>
+          <div class="panelHeader">
+            <h2>Invite</h2>
+            <button id="refreshInvitesButton" type="button">Обновить</button>
+          </div>
+          <form id="inviteForm" class="form compact">
+            <label>
+              Метка
+              <input id="inviteLabelInput" name="inviteLabel">
+            </label>
+            <label>
+              Роль
+              <select id="inviteRoleInput" name="inviteRole">
+                <option value="guest">Гость</option>
+                <option value="broadcaster">Камера</option>
+                <option value="admin">Админ</option>
+              </select>
+            </label>
+            <label>
+              Лимит
+              <input id="inviteUsesInput" name="inviteUses" type="number" min="0" value="1">
+            </label>
+            <button type="submit">Создать</button>
+          </form>
+          <div id="inviteList" class="inviteList"></div>
+        </section>
+
+        <section id="chatPanel" class="panel chatPanel" hidden>
+          <div class="panelHeader">
+            <h2>Чат</h2>
+            <span id="chatStatus" class="muted">offline</span>
+          </div>
+          <div id="messages" class="messages"></div>
+          <form id="chatForm" class="chatForm">
+            <input id="messageInput" name="message" maxlength="1000" autocomplete="off">
+            <button type="submit">Отправить</button>
+          </form>
+        </section>
+      </aside>
+    </main>
+  </body>
+</html>

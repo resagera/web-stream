@@ -1,0 +1,77 @@
+services:
+  backend:
+    build:
+      context: ./server
+    restart: unless-stopped
+    environment:
+      ADDR: :8080
+      DATA_DIR: /app/data
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:-}
+      SECURE_COOKIES: ${SECURE_COOKIES:-false}
+      MAX_PHOTO_URL_BYTES: ${MAX_PHOTO_URL_BYTES:-350000}
+      GUEST_PASSWORD: ${GUEST_PASSWORD:-change-me}
+      BROADCASTER_PASSWORD: ${BROADCASTER_PASSWORD:-change-me-broadcaster}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-change-me-admin}
+      LIVEKIT_URL: ${LIVEKIT_URL:-ws://localhost:7880}
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-devkey}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-secret}
+      LIVEKIT_ROOM: ${LIVEKIT_ROOM:-family-event}
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    volumes:
+      - ./server/data:/app/data
+    depends_on:
+      - livekit
+
+  livekit:
+    image: livekit/livekit-server:latest
+    restart: unless-stopped
+    entrypoint: ["/bin/sh", "/etc/livekit-entrypoint.sh"]
+    environment:
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-devkey}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-secret}
+      LIVEKIT_TURN_ENABLED: ${LIVEKIT_TURN_ENABLED:-false}
+      LIVEKIT_TURN_DOMAIN: ${TURN_DOMAIN:-}
+      LIVEKIT_TURN_UDP_PORT: ${LIVEKIT_TURN_UDP_PORT:-3478}
+      LIVEKIT_TURN_TLS_PORT: ${LIVEKIT_TURN_TLS_PORT:-5349}
+      LIVEKIT_TURN_RELAY_RANGE_START: ${LIVEKIT_TURN_RELAY_RANGE_START:-50101}
+      LIVEKIT_TURN_RELAY_RANGE_END: ${LIVEKIT_TURN_RELAY_RANGE_END:-50200}
+      LIVEKIT_TURN_EXTERNAL_TLS: ${LIVEKIT_TURN_EXTERNAL_TLS:-false}
+      LIVEKIT_TURN_CERT_FILE: ${LIVEKIT_TURN_CERT_FILE:-}
+      LIVEKIT_TURN_KEY_FILE: ${LIVEKIT_TURN_KEY_FILE:-}
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+      - "50000-50100:50000-50100/udp"
+      - "3478:3478/udp"
+      - "5349:5349"
+      - "50101-50200:50101-50200/udp"
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml:ro
+      - ./scripts/livekit-entrypoint.sh:/etc/livekit-entrypoint.sh:ro
+      - ./certs:/etc/livekit-certs:ro
+
+  caddy:
+    image: caddy:2.8-alpine
+    restart: unless-stopped
+    profiles:
+      - production
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:-stream.localhost}
+      LIVEKIT_DOMAIN: ${LIVEKIT_DOMAIN:-livekit.localhost}
+      ACME_EMAIL: ${ACME_EMAIL:-admin@example.com}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - backend
+      - livekit
+
+volumes:
+  caddy_data:
+  caddy_config:

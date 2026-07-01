@@ -1,0 +1,5 @@
+server
+home-stream-server
+data/*.json
+data/*.jsonl
+data/photos/
