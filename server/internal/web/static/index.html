@@ -152,6 +152,25 @@
             </label>
             <button type="submit">Сохранить событие</button>
           </form>
+          <div class="subsectionHeader">
+            <h3>Пароли</h3>
+            <span id="passwordStatus" class="muted">не загружено</span>
+          </div>
+          <form id="adminPasswordForm" class="form">
+            <label>
+              Гости
+              <input id="guestPasswordInput" name="guestPassword" type="password" autocomplete="new-password" placeholder="Новый пароль">
+            </label>
+            <label>
+              Камеры
+              <input id="broadcasterPasswordInput" name="broadcasterPassword" type="password" autocomplete="new-password" placeholder="Новый пароль">
+            </label>
+            <label>
+              Админ
+              <input id="adminPasswordInput" name="adminPassword" type="password" autocomplete="new-password" placeholder="Новый пароль">
+            </label>
+            <button type="submit">Сохранить пароли</button>
+          </form>
           <div class="stats">
             <div><strong id="onlineCount">0</strong><span>online</span></div>
             <div><strong id="viewerCount">0</strong><span>гости</span></div>

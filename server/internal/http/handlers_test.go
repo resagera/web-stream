@@ -93,6 +93,7 @@ func TestServerRecoversCorruptDataFiles(t *testing.T) {
 
 	dataDir := t.TempDir()
 	mustWriteFile(t, filepath.Join(dataDir, "guests.json"), []byte(`{"broken"`))
+	mustWriteFile(t, filepath.Join(dataDir, "passwords.json"), []byte(`{"broken"`))
 	mustWriteFile(t, filepath.Join(dataDir, "invites.json"), []byte(`{"broken"`))
 	mustWriteFile(t, filepath.Join(dataDir, "event.json"), []byte(`{"broken"`))
 	mustWriteFile(t, filepath.Join(dataDir, "chat.jsonl"), []byte(strings.Repeat("x", 70*1024)))
@@ -114,7 +115,7 @@ func TestServerRecoversCorruptDataFiles(t *testing.T) {
 		t.Fatalf("NewServer() error = %v", err)
 	}
 
-	for _, name := range []string{"guests.json", "invites.json", "event.json", "chat.jsonl", "journal.jsonl"} {
+	for _, name := range []string{"guests.json", "passwords.json", "invites.json", "event.json", "chat.jsonl", "journal.jsonl"} {
 		matches, err := filepath.Glob(filepath.Join(dataDir, name+".corrupt.*"))
 		if err != nil {
 			t.Fatalf("glob corrupt backup for %s: %v", name, err)
@@ -170,6 +171,59 @@ func TestAdminEventAndStatus(t *testing.T) {
 	}
 	if statusPayload.OnlineCount != 0 || statusPayload.ViewerCount != 0 || statusPayload.CameraCount != 0 {
 		t.Fatalf("status payload = %+v, want all zero without websocket clients", statusPayload)
+	}
+}
+
+func TestAdminPasswordsUpdateLoginPassword(t *testing.T) {
+	t.Parallel()
+
+	server := newTestServer(t)
+	guestToken := loginForTest(t, server, `{"name":"Guest","password":"guest-pass","role":"guest"}`)
+	adminToken := loginForTest(t, server, `{"name":"Admin","password":"admin-pass","role":"admin"}`)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/admin/passwords", nil)
+	req.Header.Set("Authorization", "Bearer "+guestToken)
+	rec := httptest.NewRecorder()
+	server.Handler().ServeHTTP(rec, req)
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("guest admin passwords = %d, want 401", rec.Code)
+	}
+
+	shortReq := httptest.NewRequest(http.MethodPost, "/api/admin/passwords", strings.NewReader(`{"guest_password":"123"}`))
+	shortReq.Header.Set("Content-Type", "application/json")
+	shortReq.Header.Set("Authorization", "Bearer "+adminToken)
+	shortRec := httptest.NewRecorder()
+	server.Handler().ServeHTTP(shortRec, shortReq)
+	if shortRec.Code != http.StatusBadRequest {
+		t.Fatalf("short password status = %d, want 400", shortRec.Code)
+	}
+
+	response := adminPostForTest(t, server, adminToken, "/api/admin/passwords", `{"guest_password":"new-guest-pass"}`)
+	var payload struct {
+		Passwords struct {
+			GuestConfigured       bool `json:"guest_configured"`
+			BroadcasterConfigured bool `json:"broadcaster_configured"`
+			AdminConfigured       bool `json:"admin_configured"`
+		} `json:"passwords"`
+	}
+	if err := json.Unmarshal(response, &payload); err != nil {
+		t.Fatalf("decode passwords response: %v", err)
+	}
+	if !payload.Passwords.GuestConfigured || !payload.Passwords.BroadcasterConfigured || !payload.Passwords.AdminConfigured {
+		t.Fatalf("password status = %+v, want all configured", payload.Passwords)
+	}
+
+	oldReq := httptest.NewRequest(http.MethodPost, "/api/guest/login", strings.NewReader(`{"name":"Old","password":"guest-pass","role":"guest"}`))
+	oldReq.Header.Set("Content-Type", "application/json")
+	oldRec := httptest.NewRecorder()
+	server.Handler().ServeHTTP(oldRec, oldReq)
+	if oldRec.Code != http.StatusUnauthorized {
+		t.Fatalf("old guest password status = %d, want 401", oldRec.Code)
+	}
+
+	newToken := loginForTest(t, server, `{"name":"New","password":"new-guest-pass","role":"guest"}`)
+	if newToken == "" {
+		t.Fatal("new guest token is empty")
 	}
 }
 

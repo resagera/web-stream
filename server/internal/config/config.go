@@ -54,6 +54,10 @@ func (c Config) InvitesPath() string {
 	return filepath.Join(c.DataDir, "invites.json")
 }
 
+func (c Config) PasswordsPath() string {
+	return filepath.Join(c.DataDir, "passwords.json")
+}
+
 func (c Config) EventPath() string {
 	return filepath.Join(c.DataDir, "event.json")
 }

@@ -15,6 +15,7 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("/api/livekit/token", s.livekitToken)
 	s.mux.HandleFunc("/api/livekit/webhook", s.livekitWebhook)
 	s.mux.HandleFunc("/api/admin/event", s.adminEvent)
+	s.mux.HandleFunc("/api/admin/passwords", s.adminPasswords)
 	s.mux.HandleFunc("/api/admin/status", s.adminStatus)
 	s.mux.HandleFunc("/api/admin/journal", s.adminJournal)
 	s.mux.HandleFunc("/api/admin/invites", s.adminInvites)

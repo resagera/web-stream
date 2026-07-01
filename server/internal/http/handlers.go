@@ -16,6 +16,7 @@ import (
 	"home-stream/server/internal/livekit"
 	"home-stream/server/internal/livestatus"
 	"home-stream/server/internal/media"
+	"home-stream/server/internal/passwords"
 	"home-stream/server/internal/profile"
 )
 
@@ -52,6 +53,12 @@ type disableInviteRequest struct {
 type eventRequest struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
+}
+
+type passwordUpdateRequest struct {
+	Guest       *string `json:"guest_password"`
+	Broadcaster *string `json:"broadcaster_password"`
+	Admin       *string `json:"admin_password"`
 }
 
 type liveKitTokenRequest struct {
@@ -286,6 +293,74 @@ func (s *Server) adminEvent(w stdhttp.ResponseWriter, r *stdhttp.Request) {
 	}
 }
 
+func (s *Server) adminPasswords(w stdhttp.ResponseWriter, r *stdhttp.Request) {
+	if _, ok := s.authenticateAdmin(r); !ok {
+		writeError(w, stdhttp.StatusUnauthorized, "admin_required")
+		return
+	}
+
+	switch r.Method {
+	case stdhttp.MethodGet:
+		writeJSON(w, stdhttp.StatusOK, map[string]any{"passwords": s.passwords.Public()})
+	case stdhttp.MethodPost:
+		var req passwordUpdateRequest
+		if err := readJSON(r, &req); err != nil {
+			writeError(w, stdhttp.StatusBadRequest, "invalid_json")
+			return
+		}
+		update, ok := normalizePasswordUpdate(w, req)
+		if !ok {
+			return
+		}
+		result, err := s.passwords.Update(update)
+		if err != nil {
+			writeError(w, stdhttp.StatusInternalServerError, "password_update_failed")
+			return
+		}
+		writeJSON(w, stdhttp.StatusOK, map[string]any{"passwords": result})
+	default:
+		methodNotAllowed(w)
+	}
+}
+
+func normalizePasswordUpdate(w stdhttp.ResponseWriter, req passwordUpdateRequest) (passwords.Update, bool) {
+	var update passwords.Update
+	changed := false
+
+	if req.Guest != nil {
+		value := strings.TrimSpace(*req.Guest)
+		if len(value) < 6 {
+			writeError(w, stdhttp.StatusBadRequest, "guest_password_too_short")
+			return passwords.Update{}, false
+		}
+		update.Guest = &value
+		changed = true
+	}
+	if req.Broadcaster != nil {
+		value := strings.TrimSpace(*req.Broadcaster)
+		if len(value) < 6 {
+			writeError(w, stdhttp.StatusBadRequest, "broadcaster_password_too_short")
+			return passwords.Update{}, false
+		}
+		update.Broadcaster = &value
+		changed = true
+	}
+	if req.Admin != nil {
+		value := strings.TrimSpace(*req.Admin)
+		if len(value) < 6 {
+			writeError(w, stdhttp.StatusBadRequest, "admin_password_too_short")
+			return passwords.Update{}, false
+		}
+		update.Admin = &value
+		changed = true
+	}
+	if !changed {
+		writeError(w, stdhttp.StatusBadRequest, "password_required")
+		return passwords.Update{}, false
+	}
+	return update, true
+}
+
 func (s *Server) adminStatus(w stdhttp.ResponseWriter, r *stdhttp.Request) {
 	if r.Method != stdhttp.MethodGet {
 		methodNotAllowed(w)
@@ -508,16 +583,7 @@ func (s *Server) authenticateAdmin(r *stdhttp.Request) (profile.Guest, bool) {
 }
 
 func (s *Server) passwordMatchesRole(role, password string) bool {
-	switch profile.NormalizeRole(role) {
-	case profile.RoleGuest:
-		return password == s.cfg.GuestPassword
-	case profile.RoleBroadcaster:
-		return s.cfg.BroadcasterPassword != "" && password == s.cfg.BroadcasterPassword
-	case profile.RoleAdmin:
-		return s.cfg.AdminPassword != "" && password == s.cfg.AdminPassword
-	default:
-		return false
-	}
+	return s.passwords.Matches(role, password)
 }
 
 func (s *Server) setGuestCookie(w stdhttp.ResponseWriter, token string) {

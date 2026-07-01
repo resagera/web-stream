@@ -10,23 +10,33 @@ import (
 	"home-stream/server/internal/journal"
 	"home-stream/server/internal/livestatus"
 	"home-stream/server/internal/media"
+	"home-stream/server/internal/passwords"
 	"home-stream/server/internal/profile"
 )
 
 type Server struct {
-	cfg     config.Config
-	mux     *http.ServeMux
-	guests  *profile.Store
-	invites *invite.Store
-	event   *event.Store
-	journal *journal.Store
-	media   *media.Store
-	live    *livestatus.Store
-	hub     *chat.Hub
+	cfg       config.Config
+	mux       *http.ServeMux
+	guests    *profile.Store
+	passwords *passwords.Store
+	invites   *invite.Store
+	event     *event.Store
+	journal   *journal.Store
+	media     *media.Store
+	live      *livestatus.Store
+	hub       *chat.Hub
 }
 
 func NewServer(cfg config.Config) (*Server, error) {
 	guests, err := profile.NewStore(cfg.GuestsPath())
+	if err != nil {
+		return nil, err
+	}
+	passwordStore, err := passwords.NewStore(cfg.PasswordsPath(), passwords.Defaults{
+		Guest:       cfg.GuestPassword,
+		Broadcaster: cfg.BroadcasterPassword,
+		Admin:       cfg.AdminPassword,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -52,15 +62,16 @@ func NewServer(cfg config.Config) (*Server, error) {
 	}
 
 	s := &Server{
-		cfg:     cfg,
-		mux:     http.NewServeMux(),
-		guests:  guests,
-		invites: invites,
-		event:   eventStore,
-		journal: journalStore,
-		media:   mediaStore,
-		live:    livestatus.NewStore(),
-		hub:     hub,
+		cfg:       cfg,
+		mux:       http.NewServeMux(),
+		guests:    guests,
+		passwords: passwordStore,
+		invites:   invites,
+		event:     eventStore,
+		journal:   journalStore,
+		media:     mediaStore,
+		live:      livestatus.NewStore(),
+		hub:       hub,
 	}
 	s.routes()
 	return s, nil

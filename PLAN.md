@@ -170,10 +170,12 @@ docker compose up --build
 - frontend admin-панель редактирует название и описание события.
 - добавлен журнал подключений и системных событий в `server/data/journal.jsonl`;
 - frontend admin-панель показывает последние события журнала.
+- добавлено управление паролями ролей `guest`, `broadcaster`, `admin` через `GET/POST /api/admin/passwords`;
+- пароли ролей сохраняются в `server/data/passwords.json`, а в ответах API показывается только статус наличия паролей;
+- frontend admin-панель позволяет менять пароли без перезапуска backend.
 
 Осталось:
 
-- отдельное управление общим паролем;
 - отдельная страница админки.
 
 ### 7. Production hardening
@@ -205,8 +207,8 @@ docker compose up --build
 - `photo_url` ограничен по размеру.
 - фото профиля сохраняются в `server/data/photos`, а не внутри `guests.json`.
 - backend проверяет magic bytes для `jpeg`, `png`, `webp`, а не только MIME в data URL;
-- поврежденные `guests.json`, `invites.json`, `event.json`, `chat.jsonl`, `journal.jsonl` переименовываются в `*.corrupt.<timestamp>`, сервер стартует с пустым/default состоянием;
-- `guests.json`, `invites.json`, `event.json` пишутся атомарно через temp file + fsync + rename;
+- поврежденные `guests.json`, `passwords.json`, `invites.json`, `event.json`, `chat.jsonl`, `journal.jsonl` переименовываются в `*.corrupt.<timestamp>`, сервер стартует с пустым/default состоянием;
+- `guests.json`, `passwords.json`, `invites.json`, `event.json` пишутся атомарно через temp file + fsync + rename;
 - добавлен `scripts/backup-data.sh` для ручного или cron backup `server/data` в `backups/home-stream-data-<timestamp>.tar.gz`;
 - backup-скрипт поддерживает `BACKUP_KEEP`, `BACKUP_INCLUDE_CORRUPT`, `BACKUP_DATA_DIR` и проверяет читаемость файлов;
 - добавлен `scripts/restore-data.sh` для dry-run/apply восстановления backup-архива с pre-restore backup текущих данных;

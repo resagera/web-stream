@@ -69,6 +69,11 @@ const els = {
   eventForm: document.querySelector("#eventForm"),
   eventTitleInput: document.querySelector("#eventTitleInput"),
   eventDescriptionInput: document.querySelector("#eventDescriptionInput"),
+  adminPasswordForm: document.querySelector("#adminPasswordForm"),
+  guestPasswordInput: document.querySelector("#guestPasswordInput"),
+  broadcasterPasswordInput: document.querySelector("#broadcasterPasswordInput"),
+  adminPasswordInput: document.querySelector("#adminPasswordInput"),
+  passwordStatus: document.querySelector("#passwordStatus"),
   refreshAdminButton: document.querySelector("#refreshAdminButton"),
   onlineCount: document.querySelector("#onlineCount"),
   viewerCount: document.querySelector("#viewerCount"),
@@ -116,6 +121,7 @@ function boot() {
   els.logoutButton.addEventListener("click", logout);
   els.chatForm.addEventListener("submit", onChatSubmit);
   els.eventForm.addEventListener("submit", onEventSave);
+  els.adminPasswordForm.addEventListener("submit", onPasswordSave);
   els.refreshAdminButton.addEventListener("click", loadAdmin);
   els.inviteForm.addEventListener("submit", onInviteCreate);
   els.refreshInvitesButton.addEventListener("click", loadInvites);
@@ -623,7 +629,7 @@ async function onEventSave(event) {
 }
 
 async function loadAdmin() {
-  await Promise.all([loadEvent(), loadStatus(), loadJournal(), loadInvites()]);
+  await Promise.all([loadEvent(), loadPasswords(), loadStatus(), loadJournal(), loadInvites()]);
 }
 
 async function loadEvent() {
@@ -636,6 +642,42 @@ function renderEvent(event) {
   if (!event) return;
   els.eventTitleInput.value = event.title || "";
   els.eventDescriptionInput.value = event.description || "";
+}
+
+async function onPasswordSave(event) {
+  event.preventDefault();
+  const payload = {};
+  const guestPassword = els.guestPasswordInput.value.trim();
+  const broadcasterPassword = els.broadcasterPasswordInput.value.trim();
+  const adminPassword = els.adminPasswordInput.value.trim();
+  if (guestPassword) payload.guest_password = guestPassword;
+  if (broadcasterPassword) payload.broadcaster_password = broadcasterPassword;
+  if (adminPassword) payload.admin_password = adminPassword;
+  if (!Object.keys(payload).length) {
+    els.passwordStatus.textContent = "нет изменений";
+    return;
+  }
+  const response = await api("/api/admin/passwords", payload);
+  els.guestPasswordInput.value = "";
+  els.broadcasterPasswordInput.value = "";
+  els.adminPasswordInput.value = "";
+  renderPasswords(response.passwords);
+}
+
+async function loadPasswords() {
+  if (!state.token || state.guest?.role !== "admin") return;
+  const payload = await apiGet("/api/admin/passwords");
+  renderPasswords(payload.passwords);
+}
+
+function renderPasswords(passwords) {
+  if (!passwords) return;
+  const labels = [
+    passwords.guest_configured ? "гости: задан" : "гости: нет",
+    passwords.broadcaster_configured ? "камеры: задан" : "камеры: нет",
+    passwords.admin_configured ? "админ: задан" : "админ: нет"
+  ];
+  els.passwordStatus.textContent = labels.join(" · ");
 }
 
 async function loadStatus() {
