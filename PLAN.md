@@ -44,6 +44,7 @@ docker compose up --build
 - `livekit.yaml` в корне;
 - `.env.example` с настройками;
 - volume для `server/data`;
+- настраиваемый host-каталог runtime data через `DATA_HOST_DIR`;
 - порты backend и LiveKit наружу;
 - настраиваемый host-порт backend через `BACKEND_PORT`.
 
@@ -55,6 +56,7 @@ docker compose up --build
 - `/health` отвечает;
 - `/api/guest/login` создает гостя;
 - `/api/livekit/token` выдает токен при заданных LiveKit ключах.
+- `scripts/smoke-local.sh` поднимает отдельный smoke-compose проект с временным data-каталогом и проверяет backend/API/frontend без публикации LiveKit RTC-портов на host.
 
 ### 3. Роли доступа
 
@@ -202,11 +204,13 @@ docker compose up --build
 - `photo_url` ограничен по размеру.
 - фото профиля сохраняются в `server/data/photos`, а не внутри `guests.json`.
 - backend проверяет magic bytes для `jpeg`, `png`, `webp`, а не только MIME в data URL;
+- compose поддерживает `DATA_HOST_DIR`, чтобы smoke/dev/prod могли использовать разные host-каталоги данных;
 - поврежденные `guests.json`, `passwords.json`, `invites.json`, `event.json`, `chat.jsonl`, `journal.jsonl` переименовываются в `*.corrupt.<timestamp>`, сервер стартует с пустым/default состоянием;
 - `guests.json`, `passwords.json`, `invites.json`, `event.json` пишутся атомарно через temp file + fsync + rename;
 - добавлен `scripts/backup-data.sh` для ручного или cron backup `server/data` в `backups/home-stream-data-<timestamp>.tar.gz`;
 - backup-скрипт поддерживает `BACKUP_KEEP`, `BACKUP_INCLUDE_CORRUPT`, `BACKUP_DATA_DIR` и проверяет читаемость файлов;
 - добавлен `scripts/restore-data.sh` для dry-run/apply восстановления backup-архива с pre-restore backup текущих данных;
+- добавлен `scripts/smoke-local.sh` для локальной проверки compose-контура без изменения `server/data`;
 - добавлена опциональная LiveKit TURN-конфигурация: `turn.*` reference в `livekit.yaml`, env-переменные в `.env.example`, опубликованные TURN-порты в compose;
 - добавлен `scripts/livekit-entrypoint.sh`, который рендерит runtime-конфиг LiveKit из `.env`, чтобы production API keys, webhook key и TURN не дублировались вручную;
 - добавлен каталог `certs/` для TURN/TLS сертификата и ключа, приватные файлы игнорируются git;
@@ -252,6 +256,7 @@ scripts/bootstrap-ubuntu.sh
 - опционально настраивает `ufw` через `--ufw`;
 - проверяет синтаксис `scripts/backup-data.sh`;
 - проверяет синтаксис `scripts/restore-data.sh`;
+- проверяет синтаксис `scripts/smoke-local.sh`;
 - проверяет `docker compose config`;
 - проходит `bash -n`.
 

@@ -29,6 +29,7 @@ Backend является центральной точкой для семейн
   scripts/bootstrap-ubuntu.sh    # подготовка Ubuntu-сервера: Docker, Compose, .env, ufw
   scripts/livekit-entrypoint.sh   # рендерит runtime-конфиг LiveKit из env перед стартом контейнера
   scripts/restore-data.sh        # dry-run/apply восстановление backup-архива server/data
+  scripts/smoke-local.sh          # локальная проверка compose/API/frontend на временном data-каталоге
   .env.example                   # пример переменных окружения
   server.md                      # этот файл
 
@@ -95,6 +96,7 @@ DATA_DIR=data
 PUBLIC_ORIGIN=
 SECURE_COOKIES=false
 MAX_PHOTO_URL_BYTES=350000
+DATA_HOST_DIR=./server/data
 GUEST_PASSWORD=change-me
 BROADCASTER_PASSWORD=
 ADMIN_PASSWORD=
@@ -180,6 +182,14 @@ docker compose up --build
 
 Runtime-данные backend монтируются в `./server/data`. TURN/TLS сертификаты при необходимости кладутся в `./certs` и монтируются в LiveKit как `/etc/livekit-certs`.
 
+Для локальных проверок можно переопределить каталог runtime-данных:
+
+```bash
+DATA_HOST_DIR=/tmp/home-stream-data docker compose up -d --build
+```
+
+По умолчанию используется `./server/data`.
+
 Production profile добавляет Caddy:
 
 ```bash
@@ -245,6 +255,16 @@ scripts/restore-data.sh --apply backups/home-stream-data-YYYYMMDDTHHMMSSZ.tar.gz
 ```
 
 Без `--apply` это dry-run. Перед реальной заменой `server/data` restore-скрипт создает pre-restore архив текущих данных в `backups/home-stream-data-before-restore-<timestamp>.tar.gz`.
+
+## Smoke Test
+
+Локальная проверка dev-контура:
+
+```bash
+scripts/smoke-local.sh
+```
+
+Скрипт поднимает отдельный compose project `home-stream-smoke` на `BACKEND_PORT=18080`, использует временный `DATA_HOST_DIR`, проверяет `/health`, логин гостя/камеры/админа, выдачу LiveKit JWT, admin API и отдачу `/`, `/admin.html`, `/admin.js`. Для этой проверки LiveKit запускается без публикации RTC-портов на host, чтобы не конфликтовать с уже занятыми UDP-портами. После проверки контейнеры smoke-проекта останавливаются, временные данные удаляются.
 
 ## Frontend
 
