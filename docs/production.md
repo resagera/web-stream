@@ -203,7 +203,9 @@ Restore outline:
 
 ```bash
 docker compose down
-tar -xzf backups/home-stream-data-YYYYMMDDTHHMMSSZ.tar.gz -C /tmp/home-stream-restore
-rsync -a --delete /tmp/home-stream-restore/data/ server/data/
+scripts/restore-data.sh backups/home-stream-data-YYYYMMDDTHHMMSSZ.tar.gz
+scripts/restore-data.sh --apply backups/home-stream-data-YYYYMMDDTHHMMSSZ.tar.gz
 docker compose up -d
 ```
+
+The restore script runs in dry-run mode unless `--apply` is passed. Before replacing `server/data`, it creates a pre-restore archive in `backups/home-stream-data-before-restore-<timestamp>.tar.gz`.

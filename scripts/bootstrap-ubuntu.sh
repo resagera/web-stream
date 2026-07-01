@@ -108,6 +108,7 @@ docker compose config >/dev/null
 
 echo "Checking backup script syntax..."
 bash -n scripts/backup-data.sh
+bash -n scripts/restore-data.sh
 
 cat <<'EOF'
 
@@ -124,6 +125,9 @@ Run:
 
 Manual data backup:
   scripts/backup-data.sh
+
+Restore dry run:
+  scripts/restore-data.sh backups/home-stream-data-YYYYMMDDTHHMMSSZ.tar.gz
 
 Example daily cron entry:
   15 3 * * * cd /path/to/home-stream && BACKUP_KEEP=14 scripts/backup-data.sh >/dev/null

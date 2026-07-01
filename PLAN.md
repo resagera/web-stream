@@ -209,6 +209,7 @@ docker compose up --build
 - `guests.json`, `invites.json`, `event.json` пишутся атомарно через temp file + fsync + rename;
 - добавлен `scripts/backup-data.sh` для ручного или cron backup `server/data` в `backups/home-stream-data-<timestamp>.tar.gz`;
 - backup-скрипт поддерживает `BACKUP_KEEP`, `BACKUP_INCLUDE_CORRUPT`, `BACKUP_DATA_DIR` и проверяет читаемость файлов;
+- добавлен `scripts/restore-data.sh` для dry-run/apply восстановления backup-архива с pre-restore backup текущих данных;
 - добавлена опциональная LiveKit TURN-конфигурация: `turn.*` reference в `livekit.yaml`, env-переменные в `.env.example`, опубликованные TURN-порты в compose;
 - добавлен `scripts/livekit-entrypoint.sh`, который рендерит runtime-конфиг LiveKit из `.env`, чтобы production API keys, webhook key и TURN не дублировались вручную;
 - добавлен каталог `certs/` для TURN/TLS сертификата и ключа, приватные файлы игнорируются git;
@@ -253,6 +254,7 @@ scripts/bootstrap-ubuntu.sh
 - проверяет занятость TCP-портов `8080`, `7880`, `7881`, `5349`;
 - опционально настраивает `ufw` через `--ufw`;
 - проверяет синтаксис `scripts/backup-data.sh`;
+- проверяет синтаксис `scripts/restore-data.sh`;
 - проверяет `docker compose config`;
 - проходит `bash -n`.
 

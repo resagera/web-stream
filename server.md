@@ -28,6 +28,7 @@ Backend является центральной точкой для семейн
   scripts/backup-data.sh         # архивирует server/data в backups/home-stream-data-*.tar.gz
   scripts/bootstrap-ubuntu.sh    # подготовка Ubuntu-сервера: Docker, Compose, .env, ufw
   scripts/livekit-entrypoint.sh   # рендерит runtime-конфиг LiveKit из env перед стартом контейнера
+  scripts/restore-data.sh        # dry-run/apply восстановление backup-архива server/data
   .env.example                   # пример переменных окружения
   server.md                      # этот файл
 
@@ -231,6 +232,15 @@ BACKUP_DATA_DIR=server/data
 ```
 
 Если файлы в `server/data` принадлежат container user и не читаются host-пользователем, backup нужно запускать через `sudo` или поправить права/владельца volume.
+
+Restore:
+
+```bash
+scripts/restore-data.sh backups/home-stream-data-YYYYMMDDTHHMMSSZ.tar.gz
+scripts/restore-data.sh --apply backups/home-stream-data-YYYYMMDDTHHMMSSZ.tar.gz
+```
+
+Без `--apply` это dry-run. Перед реальной заменой `server/data` restore-скрипт создает pre-restore архив текущих данных в `backups/home-stream-data-before-restore-<timestamp>.tar.gz`.
 
 ## Frontend
 
@@ -622,6 +632,7 @@ WebSocket-чаты. Требует авторизации через cookie, `Au
 30. Скрипт регулярного backup `server/data` с ротацией архивов.
 31. Admin frontend разделяет `livekit_cameras`, chat cameras и viewers в отдельных статус-списках.
 32. Атомарная запись JSON state-файлов через temp file, `fsync` и `rename`.
+33. Restore-скрипт для backup-архивов с dry-run режимом и pre-restore backup.
 
 ## Проверка
 
