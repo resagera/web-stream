@@ -211,6 +211,7 @@ docker compose up --build
 - backup-скрипт поддерживает `BACKUP_KEEP`, `BACKUP_INCLUDE_CORRUPT`, `BACKUP_DATA_DIR` и проверяет читаемость файлов;
 - добавлен `scripts/restore-data.sh` для dry-run/apply восстановления backup-архива с pre-restore backup текущих данных;
 - добавлен `scripts/smoke-local.sh` для локальной проверки compose-контура без изменения `server/data`;
+- добавлен `scripts/verify-backup-restore.sh` для локальной проверки backup/restore на временных данных;
 - добавлена опциональная LiveKit TURN-конфигурация: `turn.*` reference в `livekit.yaml`, env-переменные в `.env.example`, опубликованные TURN-порты в compose;
 - добавлен `scripts/livekit-entrypoint.sh`, который рендерит runtime-конфиг LiveKit из `.env`, чтобы production API keys, webhook key и TURN не дублировались вручную;
 - добавлен каталог `certs/` для TURN/TLS сертификата и ключа, приватные файлы игнорируются git;
@@ -257,6 +258,7 @@ scripts/bootstrap-ubuntu.sh
 - проверяет синтаксис `scripts/backup-data.sh`;
 - проверяет синтаксис `scripts/restore-data.sh`;
 - проверяет синтаксис `scripts/smoke-local.sh`;
+- проверяет синтаксис `scripts/verify-backup-restore.sh`;
 - проверяет `docker compose config`;
 - проходит `bash -n`.
 

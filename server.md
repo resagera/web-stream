@@ -30,6 +30,7 @@ Backend является центральной точкой для семейн
   scripts/livekit-entrypoint.sh   # рендерит runtime-конфиг LiveKit из env перед стартом контейнера
   scripts/restore-data.sh        # dry-run/apply восстановление backup-архива server/data
   scripts/smoke-local.sh          # локальная проверка compose/API/frontend на временном data-каталоге
+  scripts/verify-backup-restore.sh # локальная проверка backup/restore на временных данных
   .env.example                   # пример переменных окружения
   server.md                      # этот файл
 
@@ -255,6 +256,14 @@ scripts/restore-data.sh --apply backups/home-stream-data-YYYYMMDDTHHMMSSZ.tar.gz
 ```
 
 Без `--apply` это dry-run. Перед реальной заменой `server/data` restore-скрипт создает pre-restore архив текущих данных в `backups/home-stream-data-before-restore-<timestamp>.tar.gz`.
+
+Локальная проверка backup/restore:
+
+```bash
+scripts/verify-backup-restore.sh
+```
+
+Скрипт создает временный `data`, делает backup, проверяет dry-run restore, применяет restore в отдельную временную директорию и проверяет, что обычные runtime-файлы восстановились, а `*.corrupt.*` исключаются по умолчанию и включаются при `BACKUP_INCLUDE_CORRUPT=true`.
 
 ## Smoke Test
 
