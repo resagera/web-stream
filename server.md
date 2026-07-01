@@ -31,6 +31,7 @@ Backend является центральной точкой для семейн
   scripts/restore-data.sh        # dry-run/apply восстановление backup-архива server/data
   scripts/smoke-local.sh          # локальная проверка compose/API/frontend на временном data-каталоге
   scripts/verify-backup-restore.sh # локальная проверка backup/restore на временных данных
+  scripts/verify-livekit-config.sh # локальная проверка runtime-конфига LiveKit/TURN
   .env.example                   # пример переменных окружения
   server.md                      # этот файл
 
@@ -139,6 +140,14 @@ LIVEKIT_API_SECRET=secret
 В Docker Compose эти значения передаются и backend, и LiveKit. Контейнер LiveKit рендерит runtime-конфиг через `scripts/livekit-entrypoint.sh`, поэтому production-ключи не нужно дублировать в `livekit.yaml`.
 
 TURN выключен по умолчанию. Для production fallback в сложных сетях нужно задать `LIVEKIT_TURN_ENABLED=true`, `TURN_DOMAIN` и, если нужен TURN/TLS, пути `LIVEKIT_TURN_CERT_FILE`/`LIVEKIT_TURN_KEY_FILE` внутри контейнера, например `/etc/livekit-certs/turn.example.com.crt`.
+
+Проверить рендер runtime-конфига LiveKit/TURN без запуска LiveKit:
+
+```bash
+scripts/verify-livekit-config.sh
+```
+
+`scripts/livekit-entrypoint.sh` поддерживает служебный режим `LIVEKIT_CONFIG_ONLY=true`, который генерирует `/tmp/livekit.yaml`, печатает его при `LIVEKIT_DUMP_CONFIG=true` и выходит без `exec /livekit-server`.
 
 Файлы данных:
 

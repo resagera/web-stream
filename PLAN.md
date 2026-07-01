@@ -214,6 +214,7 @@ docker compose up --build
 - добавлен `scripts/verify-backup-restore.sh` для локальной проверки backup/restore на временных данных;
 - добавлена опциональная LiveKit TURN-конфигурация: `turn.*` reference в `livekit.yaml`, env-переменные в `.env.example`, опубликованные TURN-порты в compose;
 - добавлен `scripts/livekit-entrypoint.sh`, который рендерит runtime-конфиг LiveKit из `.env`, чтобы production API keys, webhook key и TURN не дублировались вручную;
+- добавлен `scripts/verify-livekit-config.sh` для локальной проверки рендера LiveKit/TURN runtime-конфига без запуска LiveKit;
 - добавлен каталог `certs/` для TURN/TLS сертификата и ключа, приватные файлы игнорируются git;
 - bootstrap script открывает `3478/udp`, `5349/tcp`, `50101:50200/udp` при `--ufw`.
 
@@ -259,6 +260,7 @@ scripts/bootstrap-ubuntu.sh
 - проверяет синтаксис `scripts/restore-data.sh`;
 - проверяет синтаксис `scripts/smoke-local.sh`;
 - проверяет синтаксис `scripts/verify-backup-restore.sh`;
+- проверяет синтаксис `scripts/verify-livekit-config.sh`;
 - проверяет `docker compose config`;
 - проходит `bash -n`.
 

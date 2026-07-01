@@ -111,6 +111,7 @@ bash -n scripts/backup-data.sh
 bash -n scripts/restore-data.sh
 bash -n scripts/smoke-local.sh
 bash -n scripts/verify-backup-restore.sh
+bash -n scripts/verify-livekit-config.sh
 
 cat <<'EOF'
 

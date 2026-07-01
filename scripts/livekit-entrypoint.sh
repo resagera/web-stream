@@ -50,4 +50,8 @@ if [ "${LIVEKIT_DUMP_CONFIG:-false}" = "true" ]; then
   cat /tmp/livekit.yaml
 fi
 
+if [ "${LIVEKIT_CONFIG_ONLY:-false}" = "true" ]; then
+  exit 0
+fi
+
 exec /livekit-server --config /tmp/livekit.yaml "$@"
